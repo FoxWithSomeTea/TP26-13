@@ -1,0 +1,17 @@
+* {
+    font-family: Arial, Helvetica, sans-serif;
+}
+.container {
+    display: flex;
+    border: 2px purple;
+    border-style: solid;
+    padding: 10px;
+    background-color: pink;
+}
+.container div {
+    background-color: lightblue;
+    padding: 10px;
+    border: 2px black;
+    border-style: solid;
+    text-align: center;
+}
