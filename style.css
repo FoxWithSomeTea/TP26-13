@@ -1,17 +1,29 @@
+body {
+    background-color: black;
+}
 * {
     font-family: Arial, Helvetica, sans-serif;
 }
 .container {
     display: flex;
-    border: 2px purple;
-    border-style: solid;
+    border: 2px purple solid;
     padding: 10px;
     background-color: pink;
 }
-.container div {
+.container .div {
     background-color: lightblue;
     padding: 10px;
-    border: 2px black;
-    border-style: solid;
+    border: 2px black solid;
     text-align: center;
 }
+.sidebar_container {
+    display: flex;
+    flex-direction: column;
+    border: 2px purple solid;
+    padding: 10px;
+    background-color: pink;
+}
+.sidebar_container div {
+    border: 2px;
+}
+
