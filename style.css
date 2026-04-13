@@ -24,6 +24,8 @@ body {
     background-color: pink;
 }
 .sidebar_container div {
-    border: 2px;
+    border: 2px orange solid;
+    background-color: yellowgreen;
+    margin: 2px 0px;
 }
 
