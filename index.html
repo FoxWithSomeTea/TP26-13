@@ -4,28 +4,25 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <div class="div" style="flex-grow: 1">
-            <p>sidebar</p>
-            <div class="sidebar_container">
-                <div>
-                    <button onclick="" style="height: 70; width: 100px;">Add</button>
-                </div>
-                <div>
-                    <form>
-                        <select>
-                            <option>V3A</option>
-                            <option>V3B</option>
-                            <option>V3C</option>
-                        </select>
-                    </form>
-                </div>
-            </div>
-        </div>
-        <div class="div" style="flex-grow: 4">
-            <p>items</p>
-        </div>
+
+    <div class="layout">
+
+        <aside class="sidebar">
+            <header class="title">
+                <h3>Maturita manager</h3>
+            </header>
+            <nav class="navigation">
+                <a target="iframe" href="overview.html">Přehled</a>
+                <a target="iframe" href="students.html">Studenti</a>
+                <a target="iframe" href="messages.html">Zpravy</a>
+            </nav>
+        </aside>
+        <main class="content">
+            <iframe name="iframe" href="overview.html" title="content"></iframe>
+        </main>
     </div>
-    <script src="test.js"></<script>
+
+
+    <script src="test.js"></script>
 </body>
 </html>
