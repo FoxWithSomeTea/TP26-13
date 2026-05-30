@@ -1,3 +1,4 @@
+/* ========== Color palette (design tokens) ========== */
 :root {
     --base: #FBFAF5;
     --donnou: #E4E4F2;
@@ -12,9 +13,12 @@
     --darker_text: #dbe5f0;
     --input: #f9fbfd;
     --input_border: #CDC7E5;
+    --input_border_dark: #8C7EC4;
     --table_border: #FBFAF5;
     --table_dark: #D7D7EC;
 }
+
+/* ========== Base / global resets ========== */
 body {
     background-color: var(--base);
     margin: 0px;
@@ -24,6 +28,8 @@ body {
 * {
     margin: 0px;
 }
+
+/* ========== Sidebar layout (index.php) ========== */
 .layout {
     display: grid;
     grid-template-columns: 0.25fr 1fr;
@@ -32,6 +38,8 @@ body {
 .sidebar {
     background-color: var(--dark);
     color: var(--light_text);
+    position: fixed;
+    height: 100%;
     grid-column: 1;
     padding: 20px 20px;
     display: flex;
@@ -68,6 +76,8 @@ iframe {
     height: 100vh;
     width: 100%;
 }
+
+/* ========== Students page (students.html) ========== */
 .students {
     display: flex;
     flex-direction: column;
@@ -99,6 +109,9 @@ iframe {
     padding: 10px 10px;
     border: 3px solid var(--input_border);
 }
+.filter:hover {
+    border-color: var(--importantblue);
+}
 .search_button {
     background-color: var(--importantblue);
     margin: 2px 0px;
@@ -116,6 +129,8 @@ iframe {
     border-radius: 20px;
     background-color: var(--donnou);
 }
+
+/* ========== Student table ========== */
 .students_table {
     border-collapse: collapse;
     width: 100%;
@@ -143,23 +158,67 @@ td:nth-child(5) {
     border-left: solid var(--table_border) 3px;
 }
 .students_table th:nth-child(1) { width: 26%; }
-.students_table th:nth-child(2) { width: 7%; }
+.students_table th:nth-child(2) {
+    width: 7%;
+    text-align: center;
+}
 .students_table th:nth-child(3) { width: 24%; }
 .students_table th:nth-child(4) { width: 19%; }
 .students_table th:nth-child(5) { width: 14%; }
 .students_table th:nth-child(6) { width: 10%; }
-.student_card {
+.student_card_name {
     text-align: left;
     font-weight: normal;
+    display: flex;
+    flex-direction: column;
+}
+.student_card_class {
+    text-align: center;
 }
 .students_table td {
     border-bottom: solid var(--table_border) 3px;
     padding: 10px;
 }
-.student_card {
+
+/* ========== Login page (login.php) ========== */
+.login-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: var(--dark);
+}
+
+.login-card {
+    background-color: var(--base);
+    padding: 40px;
+    border-radius: 20px;
+    width: 350px;
     display: flex;
     flex-direction: column;
+    gap: 20px;
 }
-.student_card input {
-     
+
+.login-card h2 {
+    text-align: center;
+    color: var(--dark);
+}
+
+.login-card form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.login-error {
+    color: var(--redwrong);
+    text-align: center;
+    font-weight: bold;
+}
+
+/* ========== Sidebar user info ========== */
+.user-info {
+    font-size: 0.85em;
+    color: var(--darker_text);
+    margin-top: 5px;
 }

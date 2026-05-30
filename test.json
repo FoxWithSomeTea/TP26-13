@@ -1,0 +1,7 @@
+{
+    "students": [
+        {"name": "john", "class": "V3A", "thesis_title": "maturita manager", "file": "bingbong.pdf", "status": "nop"},
+        {"name": "peter", "class": "V2A", "thesis_title": "bing", "file": "bingbong.pdf", "status": "nop"},
+        {"name": "martha", "class": "V4A", "thesis_title": "bong", "file": "bingbong.pdf", "status": "nop"}
+    ]
+}
