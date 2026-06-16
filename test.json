@@ -1,7 +1,0 @@
-{
-    "students": [
-        {"first_name": "Jan", "last_name": "Novak", "email": "jan.novak@skola.cz", "class_id": 1},
-        {"first_name": "Peter", "last_name": "Svoboda", "email": "peter.svoboda@skola.cz", "class_id": 2},
-        {"first_name": "Martha", "last_name": "Dvorak", "email": "martha.dvorak@skola.cz", "class_id": 3}
-    ]
-}
