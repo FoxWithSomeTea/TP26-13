@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <script src="admin.js?v=1"></script>
+</head>
+<body style="margin:0; padding:0;">
+    <div style="display:flex; flex-direction:column; gap:15px;">
+        <div class="admin-section">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3>Spravovat třídy</h3>
+                <button class="search_button" onclick="showCreateClass()">+ Vytvořit třídu</button>
+            </div>
+        </div>
+
+        <div class="filters">
+            <h3>Filtry</h3>
+            <div class="filter_grid">
+                <div class="filter-field">
+                    <label for="ac-name">Název</label>
+                    <input class="filter" type="text" id="ac-name" placeholder="Název...">
+                </div>
+                <div class="filter-field">
+                    <label for="ac-year">Rok maturity</label>
+                    <input class="filter" type="number" id="ac-year" placeholder="Rok...">
+                </div>
+                <button class="search_button filter-grid-btn" onclick="filterClasses()">Hledat</button>
+            </div>
+        </div>
+
+        <div class="admin-section">
+            <div class="admin-table-wrap">
+                <table class="data-table">
+                    <thead>
+                        <tr><th>Název</th><th>Rok maturity</th><th>Počet studentů</th><th>Akce</th></tr>
+                    </thead>
+                    <tbody id="classes-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="modal-overlay" id="create-class-modal" style="display:none">
+            <div class="modal">
+                <h3>Nová třída</h3>
+                <form id="create-class-form" onsubmit="createClass(event)">
+                    <label for="cc-name">Název</label>
+                    <input class="filter" type="text" id="cc-name" placeholder="např. V3B" required>
+                    <label for="cc-year">Rok maturity</label>
+                    <input class="filter" type="number" id="cc-year" placeholder="např. 2028" required>
+                    <div class="modal-actions">
+                        <button type="button" class="search_button cancel-btn" onclick="hideCreateClass()">Zrušit</button>
+                        <button type="submit" class="search_button send-btn">Vytvořit</button>
+                    </div>
+                </form>
+                <p id="cc-error" class="login-error" style="display:none"></p>
+                <p id="cc-success" class="import-result" style="display:none"></p>
+            </div>
+        </div>
+
+        <div class="modal-overlay" id="delete-modal" style="display:none">
+            <div class="modal">
+                <h3 id="delete-modal-title">Potvrdit smazání</h3>
+                <p id="delete-modal-info">Opravdu chcete smazat tuto položku?</p>
+                <p id="delete-modal-result" class="import-result" style="display:none"></p>
+                <div class="modal-actions">
+                    <button type="button" class="search_button cancel-btn" onclick="hideDelete()">Zrušit</button>
+                    <button type="button" class="search_button" style="background:var(--redwrong);" id="delete-modal-btn" onclick="confirmDelete()">Smazat</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Filtrování a vykreslení seznamu tříd
+        function filterClasses() {
+            const nameFilter = document.getElementById("ac-name").value.toLowerCase().trim();
+            const yearFilter = document.getElementById("ac-year").value.trim();
+            fetch("api.php?action=getClasses")
+                .then(r => r.json())
+                .then(classes => {
+                    const filtered = classes.filter(c => {
+                        return (!nameFilter || c.name.toLowerCase().includes(nameFilter))
+                            && (!yearFilter || String(c.final_year).includes(yearFilter));
+                    });
+                    const tbody = document.getElementById("classes-table-body");
+                    tbody.innerHTML = "";
+                    if (filtered.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:15px; color:var(--muted);">Žádné třídy</td></tr>';
+                        return;
+                    }
+                    filtered.forEach(c => {
+                        const tr = document.createElement("tr");
+                        tr.innerHTML = `
+                            <td>${c.name}</td>
+                            <td>${c.final_year}</td>
+                            <td>${c.student_count}</td>
+                            <td><button class="search_button" style="padding:4px 8px;font-size:12px;background:var(--redwrong);" onclick="showDeleteClass(${c.id}, '${c.name}')">Smazat</button></td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                });
+        }
+
+        loadClasses();
+    </script>
+</body>
+</html>

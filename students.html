@@ -4,79 +4,11 @@
     <link rel="stylesheet" href="style.css">
     <meta charset="UTF-8">
 </head>
-<body>
-    <main class="students">
-        <header>
-            <h2>Studenti</h2>
-        </header>
+<body style="display:flex; flex-direction:column; height:100%;">
+    <header class="titlebar">
+        <h2>Studenti</h2>
+    </header>
 
-        <!-- Filter bar: lets the user narrow down the student list -->
-        <section class="filters">
-            <h3>filters</h3>
-            <form class="filter_grid">
-                <label for="input_name">Name</label>
-                <input class="filter" id="input_name" placeholder="napr. Jan Novak" type="text">
-
-                <label for="input_class">Class</label>
-                <select class="filter" id="input_class">
-                    <option value="All classes">All classes</option>
-                    <option value="V3A">V3A</option>
-                </select>
-
-                <label for="input_name">Status</label>
-                <select class="filter" id="input_status">
-                    <option value="All statuses">All statuses</option>
-                    <option value="finished">finished</option>
-                    <option value="finished">finished</option>
-                </select>
-
-                <!-- Extra text input — placeholder for a future filter -->
-                <label for="input_name">Status</label>
-                <input class="filter" id="name" type="text">
-
-                <input class="search_button" value="Search" id="search_button" onclick="searchStudents()" type="button">
-            </form>
-        </section>
-
-        <!-- Student table: populated dynamically by students.js -->
-        <section class="student_list">
-            <table class="students_table">
-                <thead>
-                    <tr>
-                        <th>Student</th>
-                        <th>Trida</th>
-                        <th>Nazev prace</th>
-                        <th>Soubory</th>
-                        <th>Status</th>
-                        <th>Akce</th>
-                    </tr>
-                </thead>
-                <!-- Rows are inserted here by the searchStudents() function -->
-                <tbody id="students_table_body">
-                    <!-- Hardcoded example row shown before any search is done -->
-                    <tr>
-                        <td>
-                            <div class="student_card_name">
-                                <p>jan novak</p>
-                                <p>idtusad</p>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="student_card_class">
-                                V3A
-                            </div>
-                        </td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                </tbody>
-            </table>
-        </section>
-    </main>
-
-    <!-- Load the JavaScript that handles search and filtering -->
-    <script src="students.js"></script>
+    <iframe name="students-frame" id="students-frame" src="students-list.html" style="flex:1; width:100%; border:none;"></iframe>
 </body>
 </html>

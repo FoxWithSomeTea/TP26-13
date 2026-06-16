@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+</head>
+<body class="admin-page" style="display:flex; flex-direction:column; height:100%;">
+    <header class="titlebar">
+        <h2>Administrace</h2>
+    </header>
+
+    <nav class="admin-tabs">
+        <a target="admin-frame" href="admin-users.html" class="tab-btn active">Uživatelé</a>
+        <a target="admin-frame" href="admin-classes.html" class="tab-btn">Třídy</a>
+        <a target="admin-frame" href="admin-import.html" class="tab-btn">Import studentů</a>
+    </nav>
+
+    <iframe name="admin-frame" id="admin-frame" src="admin-users.html" style="flex:1; width:100%; border:none;"></iframe>
+
+    <script>
+        // Zvýrazní aktivní záložku podle aktuálního src v iframu
+        function updateActiveTab() {
+            const src = document.getElementById("admin-frame").contentWindow.location.pathname.split("/").pop();
+            document.querySelectorAll(".admin-tabs .tab-btn").forEach(a => {
+                a.classList.toggle("active", a.getAttribute("href") === src);
+            });
+        }
+        document.getElementById("admin-frame").onload = updateActiveTab;
+        updateActiveTab();
+    </script>
+</body>
+</html>

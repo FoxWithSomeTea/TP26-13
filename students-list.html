@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+</head>
+<body class="page-students" style="margin:0; padding:0;">
+    <div style="display:flex; flex-direction:column; gap:15px;">
+        <section class="filters">
+            <h3>Filtry</h3>
+            <form class="filter_grid">
+                <div class="filter-field">
+                    <label for="input_name">Jméno</label>
+                    <input class="filter" id="input_name" placeholder="napr. Jan Novak" type="text">
+                </div>
+                <div class="filter-field">
+                    <label for="input_class">Třída</label>
+                    <select class="filter" id="input_class">
+                        <option value="All classes">Všechny třídy</option>
+                    </select>
+                </div>
+                <div class="filter-field">
+                    <label for="input_status">Status</label>
+                    <select class="filter" id="input_status">
+                        <option value="All statuses">Všechny statusy</option>
+                        <option value="in_progress">řeší se</option>
+                        <option value="submitted">odevzdáno</option>
+                    </select>
+                </div>
+                <div class="filter-field">
+                    <label for="input_teacher">Učitel</label>
+                    <select class="filter" id="input_teacher">
+                        <option value="All teachers">Všichni učitelé</option>
+                    </select>
+                </div>
+                <input class="search_button filter-grid-btn" value="Hledat" id="search_button" onclick="searchStudents()" type="button">
+            </form>
+        </section>
+
+        <section class="section-card">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Třída</th>
+                        <th>Název práce</th>
+                        <th>Soubory</th>
+                        <th>Status</th>
+                        <th>Učitel</th>
+                    </tr>
+                </thead>
+                <tbody id="students_table_body">
+                    <tr>
+                        <td colspan="6" class="empty-msg" style="padding:30px;">Načítání...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+    </div>
+
+    <script src="students.js?v=2"></script>
+</body>
+</html>

@@ -1,7 +1,7 @@
 {
     "students": [
-        {"name": "john", "class": "V3A", "thesis_title": "maturita manager", "file": "bingbong.pdf", "status": "nop"},
-        {"name": "peter", "class": "V2A", "thesis_title": "bing", "file": "bingbong.pdf", "status": "nop"},
-        {"name": "martha", "class": "V4A", "thesis_title": "bong", "file": "bingbong.pdf", "status": "nop"}
+        {"first_name": "Jan", "last_name": "Novak", "email": "jan.novak@skola.cz", "class_id": 1},
+        {"first_name": "Peter", "last_name": "Svoboda", "email": "peter.svoboda@skola.cz", "class_id": 2},
+        {"first_name": "Martha", "last_name": "Dvorak", "email": "martha.dvorak@skola.cz", "class_id": 3}
     ]
 }

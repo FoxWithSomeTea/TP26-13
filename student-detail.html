@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+</head>
+<body style="margin:0; padding:0;">
+    <div style="display:flex; flex-direction:column; gap:15px;">
+        <div class="section-card">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                <div>
+                    <h3 id="thesis-title" style="margin:0;"></h3>
+                    <p id="thesis-student" style="color:var(--muted); margin:4px 0 0 0;"></p>
+                </div>
+                <a target="students-frame" href="students-list.html" class="search_button" style="text-decoration:none;">Zpět na seznam</a>
+            </div>
+            <p id="thesis-desc" style="color:var(--muted); margin-top:8px;"></p>
+            <p><strong>Vedoucí:</strong> <span id="thesis-supervisor"></span></p>
+            <p><strong>Status:</strong> <span id="thesis-status"></span></p>
+        </div>
+
+        <div class="section-card">
+            <h3>Zadání práce</h3>
+            <div id="instruction-section"><p class="empty-msg" style="padding:0;">Načítání...</p></div>
+            <div id="instruction-upload" style="margin-top:10px; display:none;">
+                <label for="instruction-file" style="display:block; margin-bottom:4px; font-weight:bold;">Nahrát zadání (PDF)</label>
+                <input class="filter" type="file" id="instruction-file" accept=".pdf" style="margin-bottom:8px;">
+                <button class="search_button" onclick="uploadInstruction()">Nahrát</button>
+                <p id="instruction-result" class="import-result" style="display:none;"></p>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h3>Odevzdané soubory</h3>
+            <div id="submission-section"><p class="empty-msg" style="padding:0;">Načítání...</p></div>
+        </div>
+
+        <div class="section-card">
+            <h3>Poznámka studenta</h3>
+            <p id="student-note" class="empty-msg" style="padding:0;"></p>
+        </div>
+
+        <div class="section-card" id="review-section">
+            <h3>Hodnocení</h3>
+            <div id="review-status"></div>
+            <label for="teacher-grade" style="display:block; margin-top:10px; font-weight:bold;">Známka</label>
+            <select class="filter" id="teacher-grade">
+                <option value="">-- Vyberte --</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+            </select>
+            <label for="teacher-note" style="display:block; margin-top:10px; font-weight:bold;">Poznámka</label>
+            <textarea id="teacher-note" rows="4" class="filter" style="width:100%; box-sizing:border-box; margin-top:4px;" placeholder="Poznámka k hodnocení..."></textarea>
+            <div style="display:flex; gap:10px; margin-top:10px;">
+                <button class="search_button" onclick="reviewThesis()" id="btn-grade">Uložit hodnocení</button>
+            </div>
+            <p id="review-result" class="import-result" style="display:none;"></p>
+        </div>
+    </div>
+
+    <script>
+        const statusLabels = {
+            "in_progress": "řeší se",
+            "submitted": "odevzdáno"
+        };
+
+        const params = new URLSearchParams(location.search);
+        const studentId = params.get("student_id");
+
+        let thesisId = null;
+
+        function loadThesis() {
+            if (!studentId) {
+                document.body.innerHTML = '<div class="section-card"><p class="empty-msg">Chybí ID studenta</p></div>';
+                return;
+            }
+
+            fetch("api.php?action=getThesisByStudent&student_id=" + studentId)
+                .then(r => r.json())
+                .then(t => {
+                    if (!t) {
+                        document.querySelector("#thesis-title").textContent = "Student nemá přiřazenou práci";
+                        return;
+                    }
+                    thesisId = t.id;
+                    document.getElementById("thesis-title").textContent = t.title || "";
+                    document.getElementById("thesis-student").textContent = t.student_name || "";
+                    document.getElementById("thesis-desc").textContent = t.description || "";
+                    document.getElementById("thesis-supervisor").textContent = t.supervisor_name || "";
+                    const statusEl = document.getElementById("thesis-status");
+                    statusEl.textContent = statusLabels[t.status] || t.status || "";
+                    statusEl.className = "status-chip status-" + (t.status || "none");
+
+                    const instrSec = document.getElementById("instruction-section");
+                    if (t.instruction_pdf_path) {
+                        instrSec.innerHTML = '<a class="search_button" href="api.php?action=downloadFile&thesis_id=' + t.id + '&type=instruction" target="_blank">Stáhnout zadání (PDF)</a>';
+                    } else {
+                        instrSec.innerHTML = '<p class="empty-msg" style="padding:0;">Zadání zatím nebylo nahráno.</p>';
+                    }
+                    document.getElementById("instruction-upload").style.display = "block";
+
+                    loadFiles();
+                    loadStudentNote(t);
+                    loadReview(t);
+                })
+                .catch(() => {
+                    document.body.innerHTML = '<div class="section-card"><p class="empty-msg">Chyba při načítání.</p></div>';
+                });
+        }
+
+        function loadFiles() {
+            const subSec = document.getElementById("submission-section");
+            fetch("api.php?action=listThesisFiles&student_id=" + studentId)
+                .then(r => r.json())
+                .then(files => {
+                    if (files.length > 0) {
+                        let html = '<ul style="list-style:none; padding:0; margin:0;">';
+                        files.forEach(f => {
+                            html += '<li style="display:flex; align-items:center; justify-content:space-between; padding:6px 0; border-bottom:1px solid var(--border);">';
+                            html += '<a href="api.php?action=downloadFile&type=submission&file_id=' + f.id + '" target="_blank">' + f.original_name + '</a>';
+                            html += ' <small style="color:var(--muted);">' + f.uploaded_at + '</small>';
+                            html += '</li>';
+                        });
+                        html += '</ul>';
+                        subSec.innerHTML = html;
+                    } else {
+                        subSec.innerHTML = '<p class="empty-msg" style="padding:0;">Student zatím neodevzdal žádné soubory.</p>';
+                    }
+                })
+                .catch(() => {
+                    subSec.innerHTML = '<p class="empty-msg" style="padding:0;">Chyba při načítání souborů</p>';
+                });
+        }
+
+        function loadStudentNote(t) {
+            document.getElementById("student-note").textContent = t.student_note || "";
+        }
+
+        function loadReview(t) {
+            const reviewStatus = document.getElementById("review-status");
+            const gradeSelect = document.getElementById("teacher-grade");
+            if (t.grade) {
+                reviewStatus.innerHTML = '<p style="color:var(--limecream); font-weight:bold;">Známka: ' + t.grade + '</p>';
+                gradeSelect.value = t.grade;
+                document.getElementById("btn-grade").disabled = true;
+            } else {
+                reviewStatus.innerHTML = '<p class="empty-msg" style="padding:0;">Práce ještě nebyla ohodnocena</p>';
+            }
+            document.getElementById("teacher-note").value = t.teacher_note || "";
+        }
+
+        function uploadInstruction() {
+            const fileInput = document.getElementById("instruction-file");
+            if (!fileInput.files.length) { alert("Vyberte PDF soubor"); return; }
+            const formData = new FormData();
+            formData.append("file", fileInput.files[0]);
+            formData.append("thesis_id", thesisId);
+            const result = document.getElementById("instruction-result");
+            result.className = "import-result";
+            result.textContent = "Nahrávám...";
+            result.style.display = "block";
+            fetch("api.php?action=uploadInstruction", { method: "POST", body: formData })
+                .then(r => r.json())
+                .then(res => {
+                    if (res.success) {
+                        result.className = "import-result success";
+                        result.textContent = "Zadání nahráno!";
+                        loadThesis();
+                    } else {
+                        result.className = "import-result error";
+                        result.textContent = "Chyba";
+                    }
+                })
+                .catch(() => {
+                    result.className = "import-result error";
+                    result.textContent = "Chyba";
+                });
+        }
+
+        function reviewThesis() {
+            const grade = document.getElementById("teacher-grade").value;
+            const note = document.getElementById("teacher-note").value;
+            if (!grade) { alert("Vyberte známku"); return; }
+            const data = new URLSearchParams();
+            data.append("thesis_id", thesisId);
+            data.append("grade", grade);
+            data.append("teacher_note", note);
+
+            const result = document.getElementById("review-result");
+            result.className = "import-result";
+            result.textContent = "Ukládám...";
+            result.style.display = "block";
+
+            fetch("api.php?action=reviewThesis", { method: "POST", body: data })
+                .then(r => r.json())
+                .then(res => {
+                    if (res.success) {
+                        result.className = "import-result success";
+                        result.textContent = "Hodnocení uloženo!";
+                        loadThesis();
+                    } else {
+                        result.className = "import-result error";
+                        result.textContent = "Chyba";
+                    }
+                })
+                .catch(() => {
+                    result.className = "import-result error";
+                    result.textContent = "Chyba";
+                });
+        }
+
+        loadThesis();
+    </script>
+</body>
+</html>

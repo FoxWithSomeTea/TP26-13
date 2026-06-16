@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <script src="admin.js?v=1"></script>
+</head>
+<body style="margin:0; padding:0;">
+    <div style="display:flex; flex-direction:column; gap:15px;">
+        <div class="admin-section">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3>Spravovat uživatele</h3>
+                <button class="search_button" onclick="showCreateUser()">+ Nový uživatel</button>
+            </div>
+        </div>
+
+        <div class="filters">
+            <h3>Filtry</h3>
+            <div class="filter_grid">
+                <div class="filter-field">
+                    <label for="au-name">Jméno</label>
+                    <input class="filter" type="text" id="au-name" placeholder="Jméno...">
+                </div>
+                <div class="filter-field">
+                    <label for="au-email">Email</label>
+                    <input class="filter" type="text" id="au-email" placeholder="Email...">
+                </div>
+                <div class="filter-field">
+                    <label for="au-role">Role</label>
+                    <select class="filter" id="au-role">
+                        <option value="">Všechny role</option>
+                        <option value="student">Student</option>
+                        <option value="teacher">Učitel</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                <div class="filter-field">
+                    <label for="au-class">Třída</label>
+                    <select class="filter" id="au-class">
+                        <option value="">Všechny třídy</option>
+                    </select>
+                </div>
+                <button class="search_button filter-grid-btn" onclick="loadUsers()">Hledat</button>
+            </div>
+        </div>
+
+        <div class="admin-section">
+            <div class="admin-table-wrap">
+                <table class="data-table">
+                    <thead>
+                        <tr><th>Jméno</th><th>Email</th><th>Role</th><th>Třída</th><th>Akce</th></tr>
+                    </thead>
+                    <tbody id="users-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="modal-overlay" id="create-user-modal" style="display:none">
+            <div class="modal">
+                <h3>Nový uživatel</h3>
+                <form id="create-user-form" onsubmit="createUser(event)">
+                    <label for="cu-first-name">Jméno</label>
+                    <input class="filter" type="text" id="cu-first-name" required>
+                    <label for="cu-last-name">Příjmení</label>
+                    <input class="filter" type="text" id="cu-last-name" required>
+                    <label for="cu-email">Email</label>
+                    <input class="filter" type="email" id="cu-email" required>
+                    <label for="cu-role">Role</label>
+                    <select class="filter" id="cu-role" onchange="toggleUserFields()">
+                        <option value="student">Student</option>
+                        <option value="teacher">Učitel</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                    <label for="cu-class">Třída (pouze student)</label>
+                    <select class="filter" id="cu-class"></select>
+                    <label for="cu-teacher">Učitel (pouze student)</label>
+                    <select class="filter" id="cu-teacher"><option value="">-- Žádný --</option></select>
+                    <label for="cu-password">Heslo (nechte prázdné pro vygenerování)</label>
+                    <input class="filter" type="text" id="cu-password" placeholder="nechte prázdné = automaticky">
+                    <div class="modal-actions">
+                        <button type="button" class="search_button cancel-btn" onclick="hideCreateUser()">Zrušit</button>
+                        <button type="submit" class="search_button send-btn">Vytvořit</button>
+                    </div>
+                </form>
+                <p id="cu-error" class="login-error" style="display:none"></p>
+                <p id="cu-success" class="import-result" style="display:none"></p>
+            </div>
+        </div>
+
+        <div class="modal-overlay" id="reset-password-modal" style="display:none">
+            <div class="modal">
+                <h3>Resetovat heslo</h3>
+                <p id="reset-password-info">Načítání...</p>
+                <p id="reset-password-result" class="import-result" style="display:none"></p>
+                <div class="modal-actions">
+                    <button type="button" class="search_button cancel-btn" onclick="hideResetPassword()">Zavřít</button>
+                    <button type="button" class="search_button send-btn" id="reset-password-btn" onclick="confirmResetPassword()">Resetovat heslo</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-overlay" id="delete-modal" style="display:none">
+            <div class="modal">
+                <h3 id="delete-modal-title">Potvrdit smazání</h3>
+                <p id="delete-modal-info">Opravdu chcete smazat tuto položku?</p>
+                <p id="delete-modal-result" class="import-result" style="display:none"></p>
+                <div class="modal-actions">
+                    <button type="button" class="search_button cancel-btn" onclick="hideDelete()">Zrušit</button>
+                    <button type="button" class="search_button" style="background:var(--redwrong);" id="delete-modal-btn" onclick="confirmDelete()">Smazat</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        loadUsers();
+        loadClasses();
+    </script>
+</body>
+</html>

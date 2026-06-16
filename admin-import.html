@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <script src="admin.js?v=1"></script>
+</head>
+<body style="margin:0; padding:0;">
+    <div style="display:flex; flex-direction:column; gap:15px;">
+        <div class="admin-section">
+            <h3>Importovat studenty z JSON</h3>
+            <form id="import-form" onsubmit="importStudents(event)">
+                <label for="import-class">Třída</label>
+                <select class="filter" id="import-class" required></select>
+                <label for="import-json">JSON data</label>
+                <textarea class="filter" id="import-json" rows="10" required placeholder='[{"first_name":"Jan","last_name":"Novak","email":"jan@skola.cz"}, ...]'></textarea>
+                <div class="modal-actions">
+                    <button type="submit" class="search_button send-btn">Importovat</button>
+                </div>
+            </form>
+            <p id="import-result" class="import-result"></p>
+        </div>
+    </div>
+
+    <script>
+        loadClasses();
+    </script>
+</body>
+</html>

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+</head>
+<body>
+    <header class="titlebar">
+        <h2>Moje závěrečná práce</h2>
+    </header>
+
+    <div id="thesis-content" style="display:flex; flex-direction:column; gap:15px;">
+        <div class="section-card">
+            <h3 id="thesis-title"></h3>
+            <p id="thesis-desc" style="color:var(--muted); margin-bottom:8px;"></p>
+            <p><strong>Vedoucí:</strong> <span id="thesis-supervisor"></span></p>
+            <p><strong>Status:</strong> <span id="thesis-status"></span></p>
+        </div>
+
+        <div class="section-card">
+            <h3>Zadání práce</h3>
+            <div id="instruction-section"><p class="empty-msg" style="padding:0;">Načítání...</p></div>
+        </div>
+
+        <div class="section-card">
+            <h3>Odevzdat práci</h3>
+            <div id="submission-section"><p class="empty-msg" style="padding:0;">Načítání...</p></div>
+            <div id="submit-section" style="display:none; margin-top:10px;"></div>
+        </div>
+
+        <div class="section-card">
+            <h3>Hodnocení</h3>
+            <div id="teacher-review-section"><p class="empty-msg" style="padding:0;">Načítání...</p></div>
+        </div>
+
+        <div class="section-card">
+            <h3>Poznámka k práci</h3>
+            <textarea id="thesis-note" rows="4" class="filter" style="width:100%; box-sizing:border-box;" placeholder="Vaše poznámka..."></textarea>
+            <button class="search_button" onclick="saveNote()" style="margin-top:10px;">Uložit poznámku</button>
+            <p id="note-result" class="import-result" style="display:none;"></p>
+        </div>
+    </div>
+
+    <script>
+        const statusLabels = {
+            "in_progress": "řeší se",
+            "submitted": "odevzdáno"
+        };
+
+        let thesisId = null;
+        let currentStatus = null;
+
+        function loadThesis() {
+            fetch("api.php?action=getThesis")
+                .then(r => r.json())
+                .then(t => {
+                    if (!t) {
+                        document.getElementById("thesis-content").innerHTML =
+                            '<div class="section-card"><p class="empty-msg" style="padding:0;">Nemáte přiřazenou žádnou závěrečnou práci.</p></div>';
+                        return;
+                    }
+                    thesisId = t.id;
+                    currentStatus = t.status;
+                    document.getElementById("thesis-title").textContent = t.title || "";
+                    document.getElementById("thesis-desc").textContent = t.description || "";
+                    document.getElementById("thesis-supervisor").textContent = t.supervisor_name || "";
+                    const statusEl = document.getElementById("thesis-status");
+                    statusEl.textContent = statusLabels[t.status] || t.status || "";
+                    statusEl.className = "status-chip status-" + (t.status || "none");
+
+                    const instrSec = document.getElementById("instruction-section");
+                    if (t.instruction_pdf_path) {
+                        instrSec.innerHTML = '<a class="search_button" href="api.php?action=downloadFile&thesis_id=' + t.id + '&type=instruction" target="_blank">Stáhnout zadání (PDF)</a>';
+                    } else {
+                        instrSec.innerHTML = '<p class="empty-msg" style="padding:0;">Zadání zatím nebylo nahráno.</p>';
+                    }
+
+                    const reviewSec = document.getElementById("teacher-review-section");
+                    if (t.grade) {
+                        reviewSec.innerHTML = '<p style="color:var(--limecream); font-weight:bold;">Známka: ' + t.grade + '</p>' +
+                            (t.teacher_note ? '<p style="margin-top:6px;"><strong>Poznámka:</strong> ' + t.teacher_note + '</p>' : '');
+                    } else {
+                        reviewSec.innerHTML = '<p class="empty-msg" style="padding:0;">Vyučující zatím nehodnotil.</p>';
+                    }
+
+                    loadFiles();
+                    renderSubmitButton();
+
+                    document.getElementById("thesis-note").value = t.student_note || "";
+                })
+                .catch(() => {
+                    document.getElementById("thesis-content").innerHTML =
+                        '<div class="section-card"><p class="empty-msg" style="padding:0;">Chyba při načítání.</p></div>';
+                });
+        }
+
+        function renderSubmitButton() {
+            const submitSec = document.getElementById("submit-section");
+            if (currentStatus === "submitted") {
+                submitSec.innerHTML = '<p style="color:var(--limecream); font-weight:bold; margin-bottom:8px;">Práce odeslána ke kontrole</p><button class="search_button" style="background:var(--redwrong);" onclick="toggleSubmit()">Vrátit odeslání</button>';
+                submitSec.style.display = "block";
+            } else {
+                submitSec.innerHTML = '<button class="search_button" style="background:var(--limecream);" onclick="toggleSubmit()">Odeslat práci ke kontrole</button>';
+                submitSec.style.display = "block";
+            }
+        }
+
+        function toggleSubmit() {
+            const data = new URLSearchParams();
+            fetch("api.php?action=toggleSubmit", { method: "POST", body: data })
+                .then(r => r.json())
+                .then(res => {
+                    if (res.success) {
+                        currentStatus = res.status;
+                        renderSubmitButton();
+                        loadFiles();
+                        const statusEl = document.getElementById("thesis-status");
+                        statusEl.textContent = statusLabels[res.status] || res.status || "";
+                        statusEl.className = "status-chip status-" + (res.status || "none");
+                    } else {
+                        alert(res.error || "Chyba");
+                    }
+                })
+                .catch(() => alert("Chyba při odesílání"));
+        }
+
+        function loadFiles() {
+            const subSec = document.getElementById("submission-section");
+            fetch("api.php?action=listThesisFiles")
+                .then(r => r.json())
+                .then(files => {
+                    let html = "";
+                    if (currentStatus !== "submitted") {
+                        html += '<form id="upload-form" enctype="multipart/form-data">';
+                        html += '<input class="filter" type="file" id="submission-files" multiple required style="margin-bottom:8px;">';
+                        html += '<button class="search_button" type="submit">Nahrát soubory</button>';
+                        html += '</form>';
+                        html += '<p id="upload-result" class="import-result" style="display:none;"></p>';
+                    }
+                    if (files.length > 0) {
+                        html += '<ul style="margin-top:10px; list-style:none; padding:0;">';
+                        files.forEach(f => {
+                            html += '<li style="display:flex; align-items:center; justify-content:space-between; padding:6px 0; border-bottom:1px solid var(--border);">';
+                            html += '<a href="api.php?action=downloadFile&type=submission&file_id=' + f.id + '" target="_blank">' + f.original_name + '</a>';
+                            html += ' <small style="color:var(--muted);">' + f.uploaded_at + '</small>';
+                            if (currentStatus !== "submitted") {
+                                html += ' <button class="search_button" style="padding:2px 8px;font-size:11px;background:var(--redwrong);" onclick="deleteFile(' + f.id + ')">Smazat</button>';
+                            }
+                            html += '</li>';
+                        });
+                        html += '</ul>';
+                    } else {
+                        html += '<p class="empty-msg" style="padding:0; margin-top:8px;">Zatím nebyly nahrány žádné soubory.</p>';
+                    }
+                    subSec.innerHTML = html;
+                    const form = document.getElementById("upload-form");
+                    if (form) form.onsubmit = uploadSubmission;
+                })
+                .catch(() => {
+                    subSec.innerHTML = '<p class="empty-msg" style="padding:0;">Chyba při načítání souborů</p>';
+                });
+        }
+
+        function uploadSubmission(e) {
+            e.preventDefault();
+            const fileInput = document.getElementById("submission-files");
+            if (!fileInput.files.length) return;
+            const formData = new FormData();
+            for (let i = 0; i < fileInput.files.length; i++) {
+                formData.append("files[]", fileInput.files[i]);
+            }
+
+            const result = document.getElementById("upload-result");
+            result.className = "import-result";
+            result.textContent = "Nahrávám...";
+            result.style.display = "block";
+
+            fetch("api.php?action=uploadSubmission", { method: "POST", body: formData })
+                .then(r => r.json())
+                .then(res => {
+                    if (res.success) {
+                        const msg = (res.uploaded || []).length + " souborů nahráno" + (res.failed && res.failed.length ? ", " + res.failed.length + " selhalo" : "");
+                        result.className = "import-result success";
+                        result.textContent = msg;
+                        loadFiles();
+                    } else {
+                        result.className = "import-result error";
+                        result.textContent = res.error || "Chyba";
+                    }
+                })
+                .catch(() => {
+                    result.className = "import-result error";
+                    result.textContent = "Chyba při nahrávání";
+                });
+        }
+
+        function deleteFile(fileId) {
+            const data = new URLSearchParams();
+            data.append("file_id", fileId);
+            fetch("api.php?action=deleteThesisFile", { method: "POST", body: data })
+                .then(r => r.json())
+                .then(res => {
+                    if (res.success) loadFiles();
+                    else alert(res.error || "Chyba");
+                })
+                .catch(() => alert("Chyba při mazání"));
+        }
+
+        function saveNote() {
+            const note = document.getElementById("thesis-note").value;
+            const data = new URLSearchParams();
+            data.append("note", note);
+
+            const result = document.getElementById("note-result");
+            result.className = "import-result";
+            result.textContent = "Ukládám...";
+            result.style.display = "block";
+
+            fetch("api.php?action=saveThesisNote", { method: "POST", body: data })
+                .then(r => r.json())
+                .then(res => {
+                    if (res.success) {
+                        result.className = "import-result success";
+                        result.textContent = "Poznámka uložena!";
+                    } else {
+                        result.className = "import-result error";
+                        result.textContent = res.error || "Chyba";
+                    }
+                })
+                .catch(() => {
+                    result.className = "import-result error";
+                    result.textContent = "Chyba při ukládání";
+                });
+        }
+
+        loadThesis();
+    </script>
+</body>
+</html>

@@ -1,18 +1,23 @@
 <?php
-// Start or resume the session (set after successful login)
 session_start();
 
-// Dev bypass: append ?dev=1 to the URL to skip login during development
-$devMode = isset($_GET["dev"]);
-
-if ($devMode) {
-    // Pretend we're logged in as a dev admin user
-    $_SESSION["user_id"] = 1;
-    $_SESSION["user_name"] = "Dev User";
-    $_SESSION["user_role"] = "admin";
+$dev = $_GET["dev"] ?? null;
+if ($dev) {
+    $devUsers = [
+        "1" => ["id" => 1, "name" => "Admin User", "role" => "admin"],
+        "admin" => ["id" => 1, "name" => "Admin User", "role" => "admin"],
+        "2" => ["id" => 4, "name" => "Karel Ucitel", "role" => "teacher"],
+        "teacher" => ["id" => 4, "name" => "Karel Ucitel", "role" => "teacher"],
+        "3" => ["id" => 2, "name" => "Jan Novak", "role" => "student"],
+        "student" => ["id" => 2, "name" => "Jan Novak", "role" => "student"],
+    ];
+    $u = $devUsers[$dev] ?? $devUsers["1"];
+    $_SESSION["user_id"] = $u["id"];
+    $_SESSION["user_name"] = $u["name"];
+    $_SESSION["user_role"] = $u["role"];
 }
 
-// If no user is logged in (and not in dev mode), redirect to the login page
+// Kontrola přihlášení – jinak přesměrování na login
 if (!isset($_SESSION["user_id"])) {
     header("Location: login.php");
     exit;
@@ -25,32 +30,30 @@ if (!isset($_SESSION["user_id"])) {
     <meta charset="UTF-8">
 </head>
 <body>
-
-    <!-- Main layout: sidebar on the left, content area on the right -->
     <div class="layout">
-
-        <!-- Sidebar navigation -->
         <aside class="sidebar">
             <header class="title">
                 <h3>Maturita manager</h3>
-                <!-- Show the logged-in user's name -->
-                <p class="user-info"><?= htmlspecialchars($_SESSION["user_name"]) ?></p>
+                <p class="user-info"><?= htmlspecialchars($_SESSION["user_name"]) ?> (<?= htmlspecialchars($_SESSION["user_role"]) ?>)</p>
             </header>
             <nav class="navigation">
-                <!-- target="iframe" loads each page inside the iframe below -->
-                <a target="iframe" href="overview.html">Přehled</a>
-                <a target="iframe" href="students.html">Studenti</a>
-                <a target="iframe" href="messages.html">Zpravy</a>
-                <!-- Logout link — destroys the session and goes back to login -->
+                <?php if ($_SESSION["user_role"] === "admin"): ?>
+                    <a target="iframe" href="students.html">Studenti</a>
+                    <a target="iframe" href="admin.html">Administrace</a>
+                    <a target="iframe" href="messages.php">Zprávy</a>
+                <?php elseif ($_SESSION["user_role"] === "teacher"): ?>
+                    <a target="iframe" href="students.html">Studenti</a>
+                    <a target="iframe" href="messages.php">Zprávy</a>
+                <?php else: ?>
+                    <a target="iframe" href="thesis-student.html">Moje práce</a>
+                    <a target="iframe" href="messages.php">Zprávy</a>
+                <?php endif; ?>
                 <a href="logout.php">Odhlásit</a>
             </nav>
         </aside>
-
-        <!-- Main content area with an iframe that loads the selected page -->
         <main class="content">
-            <iframe name="iframe" src="overview.html" title="content"></iframe>
+            <iframe name="iframe" src="<?= $_SESSION["user_role"] === "student" ? "thesis-student.html" : "students.html" ?>" title="content"></iframe>
         </main>
     </div>
-
 </body>
 </html>
