@@ -494,6 +494,22 @@ iframe {
 .import-result.warning { background: #FFF3CD; color: #856404; }
 .import-result.error   { background: #F8D7DA; color: #721C24; }
 
+/* ===== Textarea grow up (import) ===== */
+.textarea-grow-up {
+    position: relative;
+    min-height: 240px;
+}
+.textarea-grow-up textarea {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    resize: none;
+    overflow: hidden;
+    width: 100%;
+    box-sizing: border-box;
+}
+
 /* ===== Utility ===== */
 .empty-msg {
     padding: 30px;

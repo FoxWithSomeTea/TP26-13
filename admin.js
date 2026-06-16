@@ -319,6 +319,12 @@ function createClass(e) {
         });
 }
 
+// Auto-resize textarea směrem nahoru
+function growUp(el) {
+    el.style.height = "auto";
+    el.style.height = Math.max(el.scrollHeight, 240) + "px";
+}
+
 // Import studentů z JSON – parsování a odeslání na API
 function importStudents(e) {
     e.preventDefault();
@@ -337,12 +343,13 @@ function importStudents(e) {
         return;
     }
 
-    const class_id = document.getElementById("import-class")?.value || "";
+    const class_name = document.getElementById("import-class-name")?.value || "";
+    const class_year = document.getElementById("import-class-year")?.value || "";
 
     fetch("api.php?action=importStudents", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ students, class_id: class_id || null })
+        body: JSON.stringify({ students, class_name, class_year: class_year || null })
     })
     .then(r => r.json())
     .then(res => {
@@ -365,3 +372,7 @@ function importStudents(e) {
         result.className = "import-result error";
     });
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll(".textarea-grow-up textarea").forEach(growUp);
+});

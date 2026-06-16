@@ -10,10 +10,14 @@
         <div class="admin-section">
             <h3>Importovat studenty z JSON</h3>
             <form id="import-form" onsubmit="importStudents(event)">
-                <label for="import-class">Třída</label>
-                <select class="filter" id="import-class" required></select>
-                <label for="import-json">JSON data</label>
-                <textarea class="filter" id="import-json" rows="10" required placeholder='[{"first_name":"Jan","last_name":"Novak","email":"jan@skola.cz"}, ...]'></textarea>
+                <label for="import-class-name">Třída:</label>
+                <input class="filter" type="text" id="import-class-name" placeholder="např. V3B" required>
+                <label for="import-class-year">Rok maturity:</label>
+                <input class="filter" type="number" id="import-class-year" placeholder="např. 2028">
+                <label for="import-json">JSON data:</label>
+                <div class="textarea-grow-up">
+                    <textarea class="filter" id="import-json" rows="10" required placeholder='[{"first_name":"Jan","last_name":"Novak","email":"novak.jan@purkynka.cz"}, ...]' oninput="growUp(this)"></textarea>
+                </div>
                 <div class="modal-actions">
                     <button type="submit" class="search_button send-btn">Importovat</button>
                 </div>
@@ -22,8 +26,6 @@
         </div>
     </div>
 
-    <script>
-        loadClasses();
-    </script>
+
 </body>
 </html>

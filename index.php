@@ -48,6 +48,7 @@ if (!isset($_SESSION["user_id"])) {
                     <a target="iframe" href="thesis-student.html">Moje práce</a>
                     <a target="iframe" href="messages.php">Zprávy</a>
                 <?php endif; ?>
+                <a href="login.php">Změnit heslo</a>
                 <a href="logout.php">Odhlásit</a>
             </nav>
         </aside>

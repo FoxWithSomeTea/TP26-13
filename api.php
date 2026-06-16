@@ -33,6 +33,7 @@ $routes = [
     "toggleSubmit"       => ["auth" => "user", "method" => "POST"],
     "reviewThesis"       => ["auth" => "user", "method" => "POST"],
     "downloadFile"       => ["auth" => "user"],
+    "changePassword"    => ["method" => "POST"],
 ];
 
 // Ověření, že akce existuje a uživatel má oprávnění
@@ -266,7 +267,26 @@ case "importStudents":
     if (!$input || !isset($input["students"]) || !is_array($input["students"])) {
         die(json_encode(["error" => "Neplatný JSON formát. Očekáváno { students: [...] }"]));
     }
-    $default_class_id = $input["class_id"] ?? null;
+    // Získání nebo vytvoření třídy podle názvu
+    $class_name = trim($input["class_name"] ?? "");
+    $class_year = $input["class_year"] ?? null;
+    $default_class_id = null;
+    if (!empty($class_name)) {
+        $stmt = $conn->prepare("SELECT id FROM class WHERE name = ?");
+        $stmt->bind_param("s", $class_name);
+        $stmt->execute();
+        $existing = $stmt->get_result()->fetch_assoc();
+        if ($existing) {
+            $default_class_id = $existing["id"];
+        } else {
+            if (empty($class_year)) $class_year = date("Y");
+            $stmt = $conn->prepare("INSERT INTO class (name, final_year) VALUES (?, ?)");
+            $stmt->bind_param("si", $class_name, $class_year);
+            if ($stmt->execute()) {
+                $default_class_id = $conn->insert_id;
+            }
+        }
+    }
     $imported = 0;
     $errors = [];
     foreach ($input["students"] as $i => $s) {
@@ -583,6 +603,34 @@ case "reviewThesis":
     $stmt = $conn->prepare("UPDATE thesis SET grade = ?, teacher_note = ? WHERE id = ?");
     $stmt->bind_param("isi", $grade, $teacher_note, $thesis_id);
     echo json_encode(["success" => $stmt->execute()]);
+    break;
+
+case "changePassword":
+    // Změna hesla (z login stránky, není potřeba být přihlášen)
+    $email = $_POST["email"] ?? "";
+    $old_password = $_POST["old_password"] ?? "";
+    $new_password = $_POST["new_password"] ?? "";
+    if (empty($email) || empty($old_password) || empty($new_password)) {
+        die(json_encode(["error" => "Vyplňte všechna pole"]));
+    }
+    if (strlen($new_password) < 6) {
+        die(json_encode(["error" => "Nové heslo musí mít alespoň 6 znaků"]));
+    }
+    $stmt = $conn->prepare("SELECT id, password FROM user WHERE email = ?");
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $user = $stmt->get_result()->fetch_assoc();
+    if (!$user || !password_verify($old_password, $user["password"])) {
+        die(json_encode(["error" => "Neplatný email nebo staré heslo"]));
+    }
+    $hash = password_hash($new_password, PASSWORD_DEFAULT);
+    $stmt = $conn->prepare("UPDATE user SET password = ? WHERE id = ?");
+    $stmt->bind_param("si", $hash, $user["id"]);
+    if ($stmt->execute()) {
+        echo json_encode(["success" => true]);
+    } else {
+        die(json_encode(["error" => "Chyba při změně hesla"]));
+    }
     break;
 
 case "downloadFile":
