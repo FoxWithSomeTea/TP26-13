@@ -1,25 +1,4 @@
--- InfinityFree setup:
--- 1. Drop all tables, then run the whole file in phpMyAdmin SQL tab.
--- 2. Update db.php with your InfinityFree DB credentials (already done).
---
--- Login after reset: admin@purkynka.cz / password
---
--- Migration from old schema (run these ALTER TABLEs if already have data):
---   ALTER TABLE thesis MODIFY status ENUM('in_progress','submitted') DEFAULT 'in_progress';
---   ALTER TABLE thesis ADD COLUMN grade INT NULL AFTER status;
---   ALTER TABLE thesis CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
---   ALTER TABLE thesis MODIFY status ENUM('in_progress','submitted') DEFAULT 'in_progress';
---   ALTER TABLE thesis ADD COLUMN grade INT NULL AFTER status;
---   ALTER TABLE thesis DROP COLUMN teacher_note, ADD COLUMN teacher_note TEXT AFTER student_note;
---
-
--- Drop all tables (uncomment to reset):
--- DROP TABLE IF EXISTS thesis_files, messages, thesis, user, class;
-
--- On InfinityFree skip the next two lines (your DB already exists).
--- CREATE DATABASE IF NOT EXISTS my_database ...
--- USE ...
-
+-- vsichni useri heslo: password, admin heslo: passwordadmin
 CREATE TABLE class (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(20) NOT NULL,
@@ -78,8 +57,6 @@ CREATE TABLE messages (
     FOREIGN KEY (recipient_id) REFERENCES user(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Seed data: all passwords are "password"
--- Login: admin@purkynka.cz / password
 INSERT INTO class (name, final_year) VALUES
     ('V3A', 2026),
     ('V2A', 2027),

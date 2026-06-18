@@ -141,9 +141,10 @@ function hideCreateUser() {
 function createUser(e) {
     e.preventDefault();
     const data = new URLSearchParams();
-    ["first_name","last_name","email","role","password"].forEach(f => {
-        const v = document.getElementById("cu-" + f);
-        if (v && v.value) data.append(f, v.value);
+    const fieldMap = { "first_name": "cu-first-name", "last_name": "cu-last-name", "email": "cu-email", "role": "cu-role", "password": "cu-password" };
+    Object.entries(fieldMap).forEach(([key, id]) => {
+        const v = document.getElementById(id);
+        if (v && v.value) data.append(key, v.value);
     });
     data.append("class_id", document.getElementById("cu-class")?.value || "");
     data.append("teacher_id", document.getElementById("cu-teacher")?.value || "");
